@@ -1,1 +1,29 @@
 
+name: Build GhostLock root binary (branch 4.4, sheldon/sheldonp)
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone GhostLock (branch 4.4)
+        run: git clone --branch 4.4 --depth 1 https://github.com/R0rt1z2/GhostLock.git src
+
+      - name: Download Android NDK r27d
+        run: |
+          curl -L -o ndk.zip https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
+          unzip -q ndk.zip -d "$HOME"
+
+      - name: Build
+        working-directory: src
+        run: make NDK="$HOME/android-ndk-r27d"
+
+      - name: Show the binary's own hash (compare against what you install)
+        working-directory: src
+        run: sha256sum build/ghostlock_root
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ghostlock_root
+          path: src/build/ghostlock_root
